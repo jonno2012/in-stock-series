@@ -2,12 +2,11 @@
 
 namespace Tests\Feature;
 
-//use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Product;
 use App\Models\Retailer;
 use App\Models\Stock;
+use Database\Seeders\RetailerWithProductSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -32,7 +31,7 @@ class TrackCommandTest extends TestCase
         // some other aspect of the API changes? This is why we
         // should have a test for every endpoint we use which calls the endpoint
         // and at least tests the basic response
-        
+
         // Given
         // I have a product
 
@@ -43,34 +42,14 @@ class TrackCommandTest extends TestCase
         // Then
         // the stock details should be refreshed
 
-        $switch = Product::create(['name' => 'Nintendo Switch']);
+        $this->seed(RetailerWithProductSeeder::class);
 
-        $bestBuy = Retailer::create(['name' => 'Best Buy']);
-
-        $this->assertFalse($switch->inStock());
-
-        $stock = new Stock([
-            'price' => 10000,
-            'url' => 'http://foo.com',
-            'sku' => '12345',
-            'in_stock' => false,
-        ]);
-
-        $bestBuy->addStock($switch, $stock);
-
-        $this->assertFalse($stock->fresh()->in_stock);
-
-        // this will swap any http request which is made
+        $this->assertFalse(Product::first()->inStock());
         // during the test with a fake which returns this response
-        Http::fake(function() {
-            return [
-                'available' => true,
-                'price' => 29900
-            ];
-        });
+        Http::fake(fn() => ['available' => true, 'price' => 29900]);
 
-        $this->artisan('track');
+        $this->artisan('track')->expectsOutput('All Done!');
 
-//        $this->assertTrue($stock->fresh()->in_stock);
+        $this->assertTrue(Product::first()->inStock());
     }
 }

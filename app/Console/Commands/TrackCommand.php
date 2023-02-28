@@ -28,5 +28,7 @@ class TrackCommand extends Command
     {
         // maybe chunk if expecting a large result set
         Product::all()->each->track();
+
+        $this->info('All Done!');
     }
 }

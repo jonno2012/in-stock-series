@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Facades\App\Clients\ClientFactory; // a real time facade
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Http;
 
 class Stock extends Model
 {
@@ -19,21 +19,36 @@ class Stock extends Model
 
     public function track()
     {
-        // Hit an api end point for associated retailer
-        if ($this->retailer->name === 'Best Buy') {
-            $results = Http::get('http://foo.test')->json();
-        }
+        $status = $this->retailer->client()->checkAvailability($this); // real time facade. good for testability.
 
         $this->update([
-            'in_stock' => $results['available'],
-            'price' => $results['price'],
+            'in_stock' => $status->available,
+            'price' => $status->price,
         ]);
-        // Fetch details
-        // Then refresh
     }
 
     public function retailer(): BelongsTo
     {
         return $this->belongsTo(Retailer::class);
+    }
+
+
+
+    /**
+     * @return array|mixed
+     */
+    public function checkTargetAvailability(): mixed
+    {
+        $results = $this->checkAvailability();
+        return $results;
+    }
+
+    /**
+     * @return array|mixed
+     */
+    public function checkBestBuyAvailability(): mixed
+    {
+        $results = $this->checkAvailability();
+        return $results;
     }
 }

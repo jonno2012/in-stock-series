@@ -3,8 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Product;
-use App\Models\Retailer;
-use App\Models\Stock;
 use Database\Seeders\RetailerWithProductSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;

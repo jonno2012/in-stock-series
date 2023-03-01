@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Model;
-use Eloquent;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model

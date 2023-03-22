@@ -24,6 +24,8 @@ class Stock extends Model
         $this->update([
             'in_stock' => $status->available,
             'price' => $status->price,
+//            'sku' => $status->sku,
+//            'url' => $status->url,
         ]);
     }
 

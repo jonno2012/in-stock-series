@@ -15,10 +15,10 @@ class BestBuy implements Client
     public function checkAvailability(Stock $stock): StockStatus
     {
         $results = Http::get($this->endPoint($stock->sku))->json();
-
+        
         return new StockStatus(
             $results['onlineAvailability'],
-            (int) $results['salePrice'] * self::DOLLARS_TO_CENTS,
+            $this->dollarsToCents($results['salePrice']),
         );
     }
 
@@ -27,5 +27,10 @@ class BestBuy implements Client
         $key = config('services.clients.bestBuy.key');
 
         return "https://api.bestbuy.com/v1/products/{$sku}.json?apiKey={$key}";
+    }
+
+    public function dollarsToCents($salePrice)
+    {
+        return (int) ($salePrice * self::DOLLARS_TO_CENTS);
     }
 }

@@ -6,6 +6,7 @@ use App\Clients\BestBuy;
 use App\Models\Stock;
 use Database\Seeders\RetailerWithProductSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 /**
@@ -32,9 +33,21 @@ class BestBuyTest extends TestCase
             // it should return the appropriate StockStatus
             (new BestBuy())->checkAvailability($stock);
         } catch (\Exception $e) {
-            $this->fail('Failed to track the BestBuy API properly');
+            $this->fail('Failed to track the BestBuy API properly: ' . $e->getMessage());
         }
 
         $this->assertTrue(true);
+    }
+
+    // regression tests are where we have a bug and we write a test to reproduce the test and then rerun the
+    // test to make sure the test is fixed.
+    public function testItCreatesTheProperStockStatusResponse()
+    {
+        Http::fake(fn () => ['salePrice' => 299.99, 'onlineAvailability' => true]);
+
+        $stockStatus = (new BestBuy())->checkAvailability(new Stock());
+
+        $this->assertEquals(29999, $stockStatus->price);
+        $this->assertTrue($stockStatus->available);
     }
 }

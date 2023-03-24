@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\History;
 use Facades\App\Clients\ClientFactory; // a real time facade
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Model;
@@ -17,24 +18,30 @@ class Stock extends Model
         'in_stock' => 'boolean',
     ];
 
-    public function track()
+    public function track($callback = null)
     {
         $status = $this->retailer->client()->checkAvailability($this); // real time facade. good for testability.
 
         $this->update([
             'in_stock' => $status->available,
             'price' => $status->price,
-//            'sku' => $status->sku,
-//            'url' => $status->url,
         ]);
+
+        $callback && $callback($this);
+
+//        $this->recordHistory();
     }
+
 
     public function retailer(): BelongsTo
     {
         return $this->belongsTo(Retailer::class);
     }
 
-
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 
     /**
      * @return array|mixed

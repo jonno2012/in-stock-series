@@ -53,4 +53,5 @@ class StockTest extends TestCase
         $this->assertTrue($stock->in_stock);
         $this->assertEquals(9900, $stock->price);
     }
+
 }

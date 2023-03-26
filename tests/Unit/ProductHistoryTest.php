@@ -1,13 +1,10 @@
 <?php
 
+namespace Tests\Unit;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\Stock;
-use App\Models\History;
 use App\Models\Product;
-use Facades\App\Clients\ClientFactory;
-use App\Clients\StockStatus;
 
 class ProductHistoryTest extends TestCase
 {

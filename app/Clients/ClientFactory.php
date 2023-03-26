@@ -11,7 +11,7 @@ class ClientFactory
     {
         $class = "App\\Clients\\" . Str::studly($retailer->name);
 
-        if (! class_exists($class)) {
+        if (!class_exists($class)) {
             throw new ClientException(sprintf('Client %s not found', $retailer->name));
         }
 

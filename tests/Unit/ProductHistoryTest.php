@@ -18,8 +18,8 @@ class ProductHistoryTest extends TestCase
         $this->seed(\Database\Seeders\RetailerWithProductSeeder::class);
 
 //        Http::fake(fn() => ['salePrice' => 99, 'onlineAvailability' => true]);
-        ClientFactory::shouldReceive('make->availability')
-            ->andReturn(new StockStatus($available = true, $price = 99));
+
+        $this->mockClientRequest($available = true, $price = 9900);
 
         $product = Product::first();
 

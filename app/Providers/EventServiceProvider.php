@@ -33,6 +33,6 @@ class EventServiceProvider extends ServiceProvider
      */
     public function shouldDiscoverEvents(): bool
     {
-        return false;
+        return true; // means laravel will automatically discover any listeners
     }
 }

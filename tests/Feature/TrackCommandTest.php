@@ -2,25 +2,41 @@
 
 namespace Tests\Feature;
 
+use Facades\App\Clients\ClientFactory;
+use App\Clients\StockStatus;
 use App\Models\Product;
 use Database\Seeders\RetailerWithProductSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use App\Models\User;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\ImportantStockUpdate;
 
 class TrackCommandTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->seed(RetailerWithProductSeeder::class);
+
+        Notification::fake(); // means it isn't really sent
+        // Notification facade has it's own range of assertions
+    }
     /**
      * A basic feature test example.
      */
-    public function test_example(): void
-    {
-        $response = $this->get('/');
+//    public function test_example(): void
+//    {
+//        $response = $this->get('/');
+//
+//        $response->assertStatus(200);
+//    }
 
-        $response->assertStatus(200);
-    }
-
+    /** @test  */
     public function test_it_tracks_product_stock()
     {
         // In a test for a code which calls an api endpoint we
@@ -34,13 +50,11 @@ class TrackCommandTest extends TestCase
         // I have a product
 
         // When
-        // I traggier the php artisan track command
-        // assuming the stock is abailable
+        // I trigger the php artisan track command
+        // assuming the stock is available
 
         // Then
         // the stock details should be refreshed
-
-        $this->seed(RetailerWithProductSeeder::class);
 
         $this->assertFalse(Product::first()->inStock());
         // during the test with a fake which returns this response
@@ -50,4 +64,23 @@ class TrackCommandTest extends TestCase
 
         $this->assertTrue(Product::first()->inStock());
     }
+
+    public function testNotifiesTheUserWhenStockChangesInANotableWay()
+    {
+        TestCase::mockClientRequest();
+
+        $this->artisan('track');
+
+        Notification::assertSentTo(User::first(), ImportantStockUpdate::class);
+    }
+
+    public function testDoesntNotifyTheUserWhenStockChangesAndItRemainsUnavailable()
+    {
+        TestCase::mockClientRequest($available = false);
+
+        $this->artisan('track');
+
+        Notification::assertNothingSent();
+    }
+
 }

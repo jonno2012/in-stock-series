@@ -7,6 +7,7 @@ use Facades\App\Clients\ClientFactory; // a real time facade
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Events\NowInStock;
 
 class Stock extends Model
 {
@@ -21,6 +22,10 @@ class Stock extends Model
     public function track($callback = null)
     {
         $status = $this->retailer->client()->checkAvailability($this); // real time facade. good for testability.
+
+        if (! $this->in_stock && $status->available) {
+            event(new NowInStock($this));
+        }
 
         $this->update([
             'in_stock' => $status->available,

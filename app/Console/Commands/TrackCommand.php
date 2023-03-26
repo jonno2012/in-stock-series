@@ -24,11 +24,39 @@ class TrackCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle()
     {
-        // maybe chunk if expecting a large result set
-        Product::all()->each->track();
+        Product::all()
+            ->tap(fn($products) => $this->output->progressStart($products->count()))
+            ->each(function ($product) {
+                $product->track();
 
-        $this->info('All Done!');
+                $this->output->progressAdvance();
+            });
+
+        $this->showResults();
+    }
+
+    protected function showResults(): void
+    {
+        $this->output->progressFinish();
+
+        $data = Product::query()
+            ->leftJoin('stock', 'stock.product_id', '=', 'products.id')
+            ->get($this->keys());
+
+        $splitKeys = array_map(function ($value) {
+            return str_replace('_', ' ', $value);
+        }, $this->keys());
+
+        $this->table(
+            array_map('ucwords', $splitKeys),
+            $data
+        );
+    }
+
+    protected function keys(): array
+    {
+        return ['name', 'price', 'url', 'in_stock'];
     }
 }
